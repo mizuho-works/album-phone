@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="アルバム編集">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>アルバム編集(スマホ)</title>
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+
+<!-- ホーム: スマホ用ファイルを開く / 保存済みのアルバム -->
+<section id="home" class="screen">
+  <header class="bar">
+    <h1>アルバム編集</h1>
+  </header>
+  <main class="home-body">
+    <p class="lead">PCのアプリで書き出した「スマホ用ファイル」を開くと、ページの並べ替え・写真の差し替え・レイアウトの変更ができます。</p>
+    <label class="btn primary big" id="open-label">
+      スマホ用ファイルを開く
+      <input type="file" id="file-input" hidden>
+    </label>
+    <h2>保存済みのアルバム</h2>
+    <ul id="album-list" class="album-list"></ul>
+    <p id="album-empty" class="muted">まだありません</p>
+    <details class="help">
+      <summary>使い方</summary>
+      <ol>
+        <li>PCのアプリで「スマホ用ファイル」を押して、ファイル(.json)を書き出す</li>
+        <li>AirDropやiCloud Driveなどでファイルをこのスマホに送る</li>
+        <li>ここで「スマホ用ファイルを開く」→ ファイルを選ぶ</li>
+        <li>ページをタップして編集する</li>
+        <li>編集が終わったら「PCへ送る」でファイルを保存して、PCに送る</li>
+        <li>PCのアプリで「案を読み込む」→ そのファイルを選ぶ</li>
+      </ol>
+      <p class="muted">写真は小さなサムネイルだけなので、書き出し(PDF・PPTX)はPCで行います。ホーム画面に追加すると、オフラインでも開けます。</p>
+    </details>
+  </main>
+</section>
+
+<!-- 編集: ページ一覧 -->
+<section id="editor" class="screen" hidden>
+  <header class="bar">
+    <button class="icon-btn" id="btn-back" aria-label="戻る">‹</button>
+    <h1 id="album-title">アルバム</h1>
+    <button class="icon-btn" id="btn-undo" aria-label="取り消し">↶</button>
+    <button class="btn primary small" id="btn-send">PCへ送る</button>
+  </header>
+  <div class="counter" id="counter"></div>
+  <main class="page-grid-wrap">
+    <div id="page-grid" class="page-grid"></div>
+  </main>
+</section>
+
+<!-- ページ編集 -->
+<section id="page-editor" class="screen overlay" hidden>
+  <header class="bar">
+    <button class="icon-btn" id="pe-close" aria-label="閉じる">✕</button>
+    <button class="icon-btn" id="pe-prev" aria-label="前のページ">‹</button>
+    <h1 id="pe-title">p1</h1>
+    <button class="icon-btn" id="pe-next" aria-label="次のページ">›</button>
+    <button class="icon-btn" id="pe-undo" aria-label="取り消し">↶</button>
+  </header>
+  <div class="pe-preview" id="pe-preview"></div>
+  <div class="pe-hint" id="pe-hint"></div>
+  <nav class="tabs" id="pe-tabs">
+    <button data-tab="photo" class="active">写真</button>
+    <button data-tab="crop">切り抜き</button>
+    <button data-tab="layout">レイアウト</button>
+    <button data-tab="page">ページ</button>
+  </nav>
+  <div class="tab-panel" id="tab-photo">
+    <div class="row">
+      <button class="btn primary" id="btn-pick">写真を選ぶ</button>
+      <button class="btn" id="btn-swap">枠を入れ替え</button>
+      <button class="btn" id="btn-clear">枠を空にする</button>
+    </div>
+  </div>
+  <div class="tab-panel" id="tab-crop" hidden>
+    <div class="row">
+      <span class="label">拡大</span>
+      <input type="range" id="zoom-range" min="1" max="3" step="0.02" value="1">
+      <button class="btn" id="btn-crop-reset">リセット</button>
+    </div>
+    <p class="muted small">枠を指でドラッグすると、写真の位置を動かせます。</p>
+  </div>
+  <div class="tab-panel" id="tab-layout" hidden>
+    <div class="row">
+      <span class="label">枚数</span>
+      <div class="seg" id="count-seg"></div>
+      <button class="btn" id="btn-spread">見開き</button>
+    </div>
+    <div class="variants" id="variant-strip"></div>
+  </div>
+  <div class="tab-panel" id="tab-page" hidden>
+    <div class="row">
+      <button class="btn" id="btn-move-up">前へ移動</button>
+      <button class="btn" id="btn-move-down">後ろへ移動</button>
+    </div>
+    <div class="row">
+      <button class="btn" id="btn-dup">このページを複製</button>
+      <button class="btn danger" id="btn-del">このページを削除</button>
+    </div>
+  </div>
+</section>
+
+<!-- 写真を選ぶ -->
+<section id="picker" class="sheet" hidden>
+  <div class="sheet-body">
+    <header class="bar">
+      <h1>写真を選ぶ</h1>
+      <label class="check"><input type="checkbox" id="picker-unused"> 未使用のみ</label>
+      <button class="icon-btn" id="picker-close" aria-label="閉じる">✕</button>
+    </header>
+    <div class="picker-grid" id="picker-grid"></div>
+  </div>
+</section>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="layouts.js?v=1"></script>
+<script src="app.js?v=1"></script>
+</body>
+</html>
