@@ -162,7 +162,12 @@
         img.style.top = b.top + "%";
         img.style.width = b.w + "%";
         img.style.height = b.h + "%";
-        fe.appendChild(img);
+        // 左右反転は、枠の中身全体を枠の中心で反転する(PCのアプリと同じ見た目)
+        const wrap = document.createElement("div");
+        wrap.className = "photo-wrap";
+        if (f.flipX) wrap.style.transform = "scaleX(-1)";
+        wrap.appendChild(img);
+        fe.appendChild(wrap);
       } else {
         fe.classList.add("empty");
       }
@@ -400,6 +405,8 @@
     $("zoom-range").disabled = !f || !f.photo;
     $("zoom-range").value = f ? f.scale || 1 : 1;
     $("btn-crop-reset").disabled = !f || !f.photo;
+    $("btn-flip").disabled = !f || !f.photo;
+    $("btn-flip").classList.toggle("on", !!(f && f.flipX));
     // レイアウト
     renderLayoutPanel(page, editable);
     // ページ
@@ -455,7 +462,8 @@
       let tx = start.tx;
       let ty = start.ty;
       if (wPct > 100.01) {
-        const posX = 50 + start.tx * 50 + ((dx / r.width) * 100 * 100) / (100 - wPct);
+        const sx = f.flipX ? -1 : 1; // 反転している枠は、横の向きが逆
+        const posX = 50 + start.tx * 50 + ((sx * dx / r.width) * 100 * 100) / (100 - wPct);
         tx = Math.max(-1, Math.min(1, (posX - 50) / 50));
       }
       if (hPct > 100.01) {
@@ -502,6 +510,7 @@
         [a.tx, b.tx] = [b.tx, a.tx];
         [a.ty, b.ty] = [b.ty, a.ty];
         [a.scale, b.scale] = [b.scale, a.scale];
+        [a.flipX, b.flipX] = [!!b.flipX, !!a.flipX];
         swapMode = false;
         swapSrc = -1;
         selFrame = idx;
@@ -678,6 +687,7 @@
     f.tx = 0;
     f.ty = 0;
     f.scale = 1;
+    f.flipX = false;
     $("picker").hidden = true;
     afterChange();
   }
@@ -690,7 +700,7 @@
       spread: !!p.spread,
       count: p.count,
       variant: p.variant || 0,
-      frames: p.frames.map((f) => ({ photo: f.photo || null, tx: f.tx || 0, ty: f.ty || 0, scale: f.scale || 1 })),
+      frames: p.frames.map((f) => ({ photo: f.photo || null, tx: f.tx || 0, ty: f.ty || 0, scale: f.scale || 1, flipX: !!f.flipX })),
     }));
     const plan = { format: "albumplan", version: 2, full: true, name: cur.name, exportedAt: Date.now(), pages };
     const filename = `${cur.name}_案.json`;
@@ -771,6 +781,7 @@
       f.tx = 0;
       f.ty = 0;
       f.scale = 1;
+      f.flipX = false;
       afterChange();
     };
     $("btn-swap").onclick = () => {
@@ -794,6 +805,18 @@
     $("zoom-range").addEventListener("change", () => {
       $("zoom-range")._snap = false;
     });
+    $("btn-flip").onclick = () => {
+      const page = curPage();
+      if (selFrame < 0) {
+        toast("枠をタップして選んでください");
+        return;
+      }
+      const f = page.frames[selFrame];
+      if (!f.photo) return;
+      snapshot();
+      f.flipX = !f.flipX;
+      afterChange();
+    };
     $("btn-crop-reset").onclick = () => {
       const page = curPage();
       if (selFrame < 0) return;

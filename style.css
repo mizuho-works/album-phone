@@ -76,6 +76,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 .page.sq { aspect-ratio: 1 / 1; }
 .page.sp { aspect-ratio: 2 / 1; }
 .page .frame { position: absolute; overflow: hidden; background: #e6e3de; }
+.page .photo-wrap { position: absolute; inset: 0; pointer-events: none; }
 .page .frame img { position: absolute; max-width: none; user-select: none; -webkit-user-drag: none; pointer-events: none; }
 .page .frame.empty::after { content: "+"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 28px; }
 .page .frame.sel { outline: 3px solid var(--sel); outline-offset: -3px; z-index: 2; }
