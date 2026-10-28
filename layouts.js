@@ -335,6 +335,14 @@
     },
   ];
 
+  // 縦長写真を大きく見せる1枚レイアウト(3:2の縦写真がそのまま収まる比率)。
+  // 既存ページの variant 番号(表紙は 7・8)がずれないよう、表紙の後ろに足している。
+  // 縦いっぱい(上下の余白なし)と、既存の縦長(index 3)との中間。
+  const TALL_SINGLE_VARIANTS = [
+    [{ x: 0.1667, y: 0, w: 0.6667, h: 1 }],
+    [{ x: 0.1889, y: 0.0333, w: 0.6222, h: 0.9334 }],
+  ];
+
   // Back cover (裏表紙) - a fixed logo image with no user photo, extracted
   // from slide40. This isn't a count-based variant at all (no photo slots),
   // so it's applied via the page.backCover flag instead - see state.js.
@@ -349,7 +357,7 @@
     if (isSpread) {
       return SPREAD_LAYOUT_VARIANTS[count] || LAYOUT_VARIANTS[count] || LAYOUT_VARIANTS[1];
     }
-    if (count === 1) return LAYOUT_VARIANTS[1].concat(COVER_VARIANTS);
+    if (count === 1) return LAYOUT_VARIANTS[1].concat(COVER_VARIANTS, TALL_SINGLE_VARIANTS);
     return LAYOUT_VARIANTS[count] || LAYOUT_VARIANTS[1];
   }
 

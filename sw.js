@@ -1,6 +1,6 @@
 // オフラインでも開けるように、アプリ本体をキャッシュする(更新はオンライン時に自動で反映)
 const CACHE = "albumphone-v1";
-const FILES = ["./", "./index.html", "./style.css?v=2", "./app.js?v=2", "./layouts.js?v=4", "./manifest.webmanifest", "./icon-192.png", "./apple-touch-icon.png"];
+const FILES = ["./", "./index.html", "./style.css?v=2", "./app.js?v=2", "./layouts.js?v=5", "./manifest.webmanifest", "./icon-192.png", "./apple-touch-icon.png"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
 });
